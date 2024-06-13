@@ -1,5 +1,3 @@
-# main.py
-
 from . import fetch_data
 from . import analyze
 from . import visualize
@@ -14,12 +12,13 @@ def welcome_screen():
     print("4. Win Rate")
     print("5. All Metrics")
     print("6. Refresh Data")
+    print("7. Success Rate by Time of Day")
     print("0. Exit")
 
 def main():
     while True:
         welcome_screen()
-        choice = input("Enter your choice (0-6): ")
+        choice = input("Enter your choice (0-7): ")
 
         if choice == '6':
             fetch_data.fetch_data()
@@ -39,6 +38,9 @@ def main():
             visualize.visualize_data({"win_rate": analysis["win_rate"]})
         elif choice == '5':
             visualize.visualize_data(analysis)
+        elif choice == '7':
+            success_by_time = analyze.analyze_success_by_time_of_day(data)
+            visualize.visualize_success_by_time_of_day(success_by_time)
         elif choice == '0':
             print("Exiting the program. Goodbye!")
             break

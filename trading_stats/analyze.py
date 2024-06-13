@@ -1,8 +1,7 @@
-# analyze.py
-
 import csv
 import os
 import pandas as pd
+from collections import defaultdict
 
 csv_file = os.path.join(os.path.dirname(__file__), 'data.csv')
 
@@ -34,7 +33,38 @@ def analyze_data(data):
         "max_loss": max_loss
     }
 
+def analyze_success_by_time_of_day(data):
+    time_slots = defaultdict(lambda: {'wins': 0, 'losses': 0, 'total': 0})
+
+    for trade in data:
+        entry_time = pd.to_datetime(trade['EnteredAt'])
+        time_slot = entry_time.strftime('%I %p')  # 12-hour format with AM/PM
+        if float(trade['TotalPnL']) > 0:
+            time_slots[time_slot]['wins'] += 1
+        else:
+            time_slots[time_slot]['losses'] += 1
+        time_slots[time_slot]['total'] += 1
+
+    all_time_slots = [f"{hour:02d} AM" for hour in range(1, 12)] + ["12 PM"] + [f"{hour:02d} PM" for hour in range(1, 12)]
+
+    success_rate_by_time = {}
+    for time_slot in all_time_slots:
+        results = time_slots[time_slot]
+        total_trades = results['total']
+        if total_trades > 0:
+            success_rate = (results['wins'] / total_trades) * 100
+        else:
+            success_rate = None
+        success_rate_by_time[time_slot] = {
+            'success_rate': success_rate,
+            'total_trades': total_trades
+        }
+
+    return success_rate_by_time
+
 if __name__ == "__main__":
     data = read_from_csv()
     analysis = analyze_data(data)
+    success_by_time = analyze_success_by_time_of_day(data)
     print(analysis)
+    print(success_by_time)
